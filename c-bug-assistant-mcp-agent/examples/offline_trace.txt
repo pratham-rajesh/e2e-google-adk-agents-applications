@@ -1,0 +1,42 @@
+(offline demo database: a fresh temporary SQLite file, seeded with 8 demo tickets)
+
+==============================================================================
+SCENARIO 1 - a duplicate report
+==============================================================================
+>>> USER: Customers get an HTTP 500 at checkout whenever a discontinued product is in their cart. Logs show a NullPointerException in PriceCalculator.
+  [bug_triage_assistant] -> find_duplicates({"title": "Checkout HTTP 500 NullPointerException with discontinued product in cart", "description": "NullP...)
+  [bug_triage_assistant] <- find_duplicates: status=ok count=1
+  [bug_triage_assistant] -> get_ticket({"ticket_id": 1})
+  [bug_triage_assistant] <- get_ticket: status=ok ticket=#1
+  [bug_triage_assistant] -> add_comment({"ticket_id": 1, "body": "New report from support (2026-11-15): still happening in production for carts con...)
+  [bug_triage_assistant] ** PAUSED: approval needed for add_comment
+  [bug_triage_assistant] <- add_comment: status=waiting-for-human
+  [human] (auto) approved add_comment
+  [bug_triage_assistant] <- add_comment: status=ok ticket=#1
+  [bug_triage_assistant] This is a duplicate of ticket #1 ('Checkout fails with HTTP 500 ... discontinued product', open, high). Its comments already identify the cause (discontinued SKUs have price=NULL after the catalogue i
+
+ASSISTANT: This is a duplicate of ticket #1 ('Checkout fails with HTTP 500 ... discontinued product', open, high). Its comments already identify the cause (discontinued SKUs have price=NULL after the catalogue import), so I did not open a new ticket. With your approval I added a comment recording this new occurrence.
+
+writes=1  ticket changes=[('add_comment', 1)]  refused by policy=0
+
+==============================================================================
+SCENARIO 2 - a new bug, researched and filed
+==============================================================================
+>>> USER: Our Stripe webhook endpoint answers 400 'signature mismatch' for every event since we added the express.json() middleware. Nothing else changed.
+  [bug_triage_assistant] -> find_duplicates({"title": "Stripe webhook returns 400 signature mismatch", "description": "Every Stripe event fails signatu...)
+  [bug_triage_assistant] <- find_duplicates: status=ok count=0
+  [bug_triage_assistant] -> cause_researcher({"request": "Stripe webhook endpoint returns 400 'signature mismatch' for every event after adding express....)
+  [bug_triage_assistant] <- cause_researcher: status=ok PROBABLE CAUSE: Stripe signs the raw request bytes. express.json() consumes and re-serialises the body before the han...
+  [bug_triage_assistant] -> create_ticket({"title": "Stripe webhook returns 400 'signature mismatch' after adding express.json()", "description": "Co...)
+  [bug_triage_assistant] <- create_ticket: status=refused_by_policy The text looks like it contains a payment/webhook secret. Remove or mask it (e.g. '<redacted>') and call the tool again.
+  [bug_triage_assistant] -> create_ticket({"title": "Stripe webhook returns 400 'signature mismatch' after adding express.json()", "description": "St...)
+  [bug_triage_assistant] ** PAUSED: approval needed for create_ticket
+  [bug_triage_assistant] <- create_ticket: status=waiting-for-human
+  [human] (auto) approved create_ticket
+  [bug_triage_assistant] <- create_ticket: status=ok ticket=#9
+  [bug_triage_assistant] No existing ticket matched (closest was below the duplicate threshold). Researched cause: the JSON middleware changes the bytes Stripe signed. Fix: use express.raw() on the webhook route. I filed it a
+
+ASSISTANT: No existing ticket matched (closest was below the duplicate threshold). Researched cause: the JSON middleware changes the bytes Stripe signed. Fix: use express.raw() on the webhook route. I filed it as a high-priority 'payments' ticket after you approved it; my first draft contained a webhook secret from the logs, which the secret guardrail refused, so the ticket text is redacted.
+
+writes=1  ticket changes=[('create_ticket', 9)]  refused by policy=1
+  refused create_ticket: The text looks like it contains a payment/webhook secret. Remove or mask it (e.g. '<redacted>') and call the t

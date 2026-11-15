@@ -1,0 +1,20 @@
+[project]
+name = "bug-assistant-mcp-agent"
+version = "0.1.0"
+description = "A bug triage assistant: Google ADK agent + a custom MCP ticket-tracker server"
+requires-python = ">=3.11"
+dependencies = [
+  "google-adk[mcp]>=1.18",   # McpToolset needs the `mcp` extra (mcp>=1.24,<3)
+  "ddgs>=9",                 # keyless web search for non-Gemini backends
+  "pydantic>=2.7",
+  "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+local = ["litellm>=1.50"]   # Ollama / Groq / OpenRouter backends
+dev = ["pytest>=8", "pytest-asyncio>=0.23"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+pythonpath = ["."]

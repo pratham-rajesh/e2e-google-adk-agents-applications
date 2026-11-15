@@ -8,7 +8,7 @@ execution walkthrough, and a video script). See [PLAN.md](PLAN.md) for the roadm
 |---|---|---|---|---|
 | A | Deep-research lead-generation agent | [a-lead-generation-agent](a-lead-generation-agent) | built, 37 offline tests | _to be added_ |
 | B | Gemini CLI as a tool in an ADK pipeline | [b-gemini-cli-tool-agent](b-gemini-cli-tool-agent) | built, 61 offline tests | _to be added_ |
-| C | MCP-tools bug assistant | c-bug-assistant-mcp-agent | planned | - |
+| C | MCP-tools bug assistant | [c-bug-assistant-mcp-agent](c-bug-assistant-mcp-agent) | built, 62 offline tests | _to be added_ |
 | D | Production code-review assistant | d-code-review-assistant | planned | - |
 | E | Production e-commerce agent | e-ecommerce-agent | planned | - |
 
