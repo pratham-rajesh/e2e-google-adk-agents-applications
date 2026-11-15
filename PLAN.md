@@ -29,7 +29,10 @@ walkthrough) and a video script. After every part a handover note is written to
 - Config through env vars (`.env.example` per part); no secrets committed.
 - **Offline test suite per part** (pytest): deterministic tools are unit-tested; the agent graph is
   exercised end to end with a scripted fake `BaseLlm`, so `pytest` passes with no API key.
-- **Live run** (needs `GOOGLE_API_KEY` or Vertex AI creds) is documented in each README.
+- **Live run** is documented in each README. **Free-first rule (owner has no paid API):** every part must
+  run on a free backend - Gemini API free tier (AI Studio key, no billing), Ollama (local, 8 GB VRAM box),
+  or Groq/OpenRouter free tiers via LiteLLM - selected by env var, plus keyless web search (DuckDuckGo).
+  Paid/Vertex/AlloyDB paths are optional extras, never required.
 - Original implementations. The hint repos/blogs are credited as inspiration; no code is copied.
 - Commits are authored by the repo owner only.
 
@@ -80,7 +83,7 @@ Deliverables: code, tests, README with Mermaid diagram, sample output, video scr
 
 | Part | Build | Offline tests | Live run | Video script | Handover |
 |------|-------|---------------|----------|--------------|----------|
-| A | done | done (22 tests) | not run (no API key available) | done | done |
+| A | done | done (37 tests) | not run (no API key available) | done | done |
 | B | todo | todo | needs API key + gemini CLI | todo | todo |
 | C | todo | todo | needs API key | todo | todo |
 | D | todo | todo | needs API key | todo | todo |

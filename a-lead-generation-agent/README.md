@@ -48,6 +48,7 @@ flowchart TD
 | Evaluator calls `exit_loop` | LLM judges coverage/diversity; `max_iterations` bounds cost regardless. |
 | Dynamic `ParallelAgent` | The number of per-lead analysts is only known at run time. Instructions are passed as callables so company names containing `{}` cannot break ADK's `{placeholder}` templating. |
 | Approval guardrail | `before_agent_callback` on the pipeline refuses to run unless the user-approved brief is in state - the prompt asks nicely, the code enforces. |
+| Pluggable models |  `Models` dataclass + `models.py`: Gemini gets `output_schema` + retries; other backends go through LiteLLM with prompt-level JSON and a lenient parser. |
 | Safe fetching | LLM-produced URLs are untrusted: http(s) only, DNS-resolved and rejected if private/loopback/link-local, redirects re-validated per hop, size and time capped. |
 | State via `state_delta` events | Persists correctly under any `SessionService`, not just in-memory. |
 | `SequentialAgent`/`LoopAgent`/`ParallelAgent` | ADK 2.x marks them deprecated in favour of `Workflow`, but `Workflow` cannot yet be an `LlmAgent` sub-agent, which this coordinator design needs. Revisit when that lands. |
@@ -65,11 +66,24 @@ lead_gen_agent/
   prompts.py        every prompt
   schemas.py        ResearchBrief / Lead / LeadBatch
   config.py         env config + shared state-key names
-  tools/            brief.py (function tools), web.py, scoring.py, export.py
-tests/              22 offline tests, scripted FakeLlm (no API key)
+  models.py         free-first provider selection (gemini / ollama / groq / openrouter)
+  tools/            brief.py (function tools), web.py, search.py (free DDG search), scoring.py, export.py
+tests/              37 offline tests, scripted FakeLlm (no API key)
 scripts/run_pipeline.py   terminal runner that prints an execution trace
 examples/offline_trace.txt  captured trace of the scripted run
 ```
+
+## Free to run - no paid API needed
+
+| Backend | Cost | Setup | Notes |
+|---|---|---|---|
+| `gemini` (default) | Free tier, no card | Free key from [AI Studio](https://aistudio.google.com/apikey) | Rate limited; built-in retry/backoff is enabled; keep `LEADGEN_MAX_ITERATIONS=2`, `LEADGEN_DEEP_DIVE_TOP_N=3`. Uses Google Search grounding. |
+| `ollama` | Free, local, offline | Install [Ollama](https://ollama.com), `ollama pull qwen3:8b`, `pip install -e ".[local]"` | Fits 8 GB VRAM. Small models follow tool-calling less reliably; the extractor falls back to lenient JSON parsing. |
+| `groq` / `openrouter` | Free tiers | API key + `pip install -e ".[local]"` | Larger models (70B) = better research quality than local 8B. |
+
+Search uses Gemini's Google Search grounding on the `gemini` backend and a keyless DuckDuckGo tool
+([`tools/search.py`](lead_gen_agent/tools/search.py)) everywhere else (override with
+`LEADGEN_SEARCH_BACKEND`). The offline test-suite and `--offline` demo need no key at all.
 
 ## Setup
 
@@ -77,7 +91,7 @@ examples/offline_trace.txt  captured trace of the scripted run
 cd a-lead-generation-agent
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
-cp .env.example .env     # add GOOGLE_API_KEY (or Vertex AI settings)
+cp .env.example .env     # add a free GOOGLE_API_KEY, or switch LEADGEN_PROVIDER (see above)
 ```
 
 ## Run
@@ -125,8 +139,7 @@ the lead data is invented; what is real is the ADK execution: routing, state, lo
 
 ## Live run notes
 
-Offline tests prove the wiring; they cannot prove research *quality*. For a live run you need a
-Gemini key or Vertex AI project. Expect 2-4 minutes and roughly 15-40 model calls for a 5-10 lead
+Offline tests prove the wiring; they cannot prove research *quality*. For a live run use any free backend above. Expect 2-4 minutes and roughly 15-40 model calls for a 5-10 lead
 run. Tune `LEADGEN_MAX_ITERATIONS`, `LEADGEN_DEEP_DIVE_TOP_N` and the model env vars to trade cost
 for depth. Contact emails are scraped from public pages and must be verified before outreach;
 respect each site's terms and applicable privacy/anti-spam law.

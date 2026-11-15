@@ -35,7 +35,7 @@ Leads already found (do NOT repeat these):
 Gaps identified by the previous round (prioritise these):
 {research_gaps}
 
-Use Google Search to find real companies that match the brief. Run several searches covering the
+Use the search tool to find real companies that match the brief. Run several searches covering the
 different search angles (and the gaps above, if any). Prefer primary evidence: company sites,
 funding announcements, press releases, reputable news and directories.
 
@@ -87,7 +87,7 @@ Website: {website}
 What our user sells: {product}
 Signals that matter: {signals}
 
-Use Google Search to look for recent (last ~12 months) evidence: funding rounds, hiring for relevant
+Use the search tool to look for recent (last ~12 months) evidence: funding rounds, hiring for relevant
 roles, product launches, expansions, leadership changes, public pain points, relevant regulation.
 Write 3-6 concise bullet points. Each bullet must end with the source URL in parentheses.
 If you find nothing relevant, say exactly "No clear signals found." Do not speculate.
@@ -118,4 +118,11 @@ Write a Markdown report with these sections:
 
 Only use facts present above. Cite sources inline as [n] markers tied to the Sources list.
 End by telling the user where the CSV file is.
+"""
+
+JSON_ONLY_SUFFIX = """
+
+Reply with ONLY a JSON object, no prose and no code fences, in exactly this shape:
+{"leads": [{"company_name": "", "website": "", "hq_location": "", "industry": "",
+            "size_hint": "", "description": "", "why_fit": "", "source_urls": [""]}]}
 """

@@ -4,9 +4,9 @@ Read this first if you are a fresh session. Then read `PLAN.md` (overall plan + 
 
 ## State
 - Part A is **built, tested offline, documented**. Folder: `a-lead-generation-agent/`.
-- `pytest` there: 22 passed (no API key). Offline demo: `python scripts/run_pipeline.py --offline`.
-- **Not done / cannot be done by the agent**: live run against Gemini (no `GOOGLE_API_KEY` in the
-  environment), recording/uploading the YouTube video (script is in `docs/video/part-a-script.md`).
+- `pytest` there: 37 passed (no API key). Offline demo: `python scripts/run_pipeline.py --offline`.
+- **Not done / cannot be done by the agent**: a live LLM run (owner has NO paid API and no key set; free
+  options are wired in - see "Free-first" below), recording/uploading the YouTube video (script is in `docs/video/part-a-script.md`).
 - Parts B, C, D, E: not started. Next up: **Part B** (Gemini CLI as a tool in an ADK pipeline).
 
 ## Environment (Windows 11, Git Bash + PowerShell)
@@ -21,6 +21,18 @@ Read this first if you are a fresh session. Then read `PLAN.md` (overall plan + 
   mtoscano84/sports-agent-adk-mcp-alloydb.
 - Git commits: author is the repo owner (global git config). **Do NOT add Co-Authored-By / "Generated
   with Claude" lines** - the user explicitly asked for no Claude attribution.
+
+## Free-first (owner constraint, applies to ALL remaining parts)
+Owner has no paid API. Part A has `lead_gen_agent/models.py` (provider switch: gemini free tier /
+ollama / groq / openrouter via ADK `LiteLlm`) and `tools/search.py` (keyless DuckDuckGo `ddgs` tool,
+used when not on Gemini because `google_search` grounding is Gemini-only). **Copy this pattern into
+parts B-E** (rename the env prefix per part). Facts verified: LiteLlm id for Ollama is
+`ollama_chat/<model>` (not `ollama/`); owner GPU is RTX 5060 8 GB so use <=8B models; Ollama is not
+installed yet; Gemini free tier is rate limited so use `HttpRetryOptions` (see `generation_config()`);
+only give Gemini a hard `output_schema`, parse JSON leniently for other backends (`parse_json_object`).
+Part B specifically: Gemini CLI has a free tier with Google-account login (no billing) - use that.
+Part E: use SQLite/Postgres in Docker instead of AlloyDB; keep AlloyDB as a documented optional path.
+Optional deps `ddgs`, `litellm` are installed in the shared venv (litellm is large; see disk notes).
 
 ## Patterns established in Part A (reuse them)
 - Package layout: `<pkg>/__init__.py` (`from . import agent`), `agent.py` -> `root_agent`,

@@ -12,10 +12,6 @@ try:  # optional, only for local development
 except ImportError:  # pragma: no cover
     pass
 
-FAST_MODEL = os.getenv("LEADGEN_FAST_MODEL", "gemini-2.5-flash")
-SMART_MODEL = os.getenv("LEADGEN_SMART_MODEL", "gemini-2.5-pro")
-
-
 def max_iterations() -> int:
     return int(os.getenv("LEADGEN_MAX_ITERATIONS", "3"))
 

@@ -17,14 +17,14 @@ from typing import Any, AsyncGenerator
 from google.adk.agents import BaseAgent, LlmAgent, ParallelAgent
 from google.adk.agents.invocation_context import InvocationContext
 from google.adk.events import Event, EventActions
-from google.adk.tools import google_search
 from google.genai import types
 
-from . import config, prompts
+from . import config, models, prompts
 from .config import K
 from .tools import web
 from .tools.export import export_csv
 from .tools.scoring import merge_leads, rank_leads, ranking_markdown
+from .tools.search import search_tools
 
 
 def _say(author: str, text: str, **state_delta: Any) -> Event:
@@ -53,11 +53,20 @@ def _as_dict(value: Any) -> dict:
     if hasattr(value, "model_dump"):
         return value.model_dump()
     if isinstance(value, str):
+        return parse_json_object(value)
+    return {}
+
+
+def parse_json_object(text: str) -> dict:
+    """Leniently extract a JSON object from model text (handles ```json fences and chatter)."""
+    text = text.strip()
+    for candidate in (text, text[text.find("{"): text.rfind("}") + 1] if "{" in text else ""):
         try:
-            parsed = json.loads(value)
-            return parsed if isinstance(parsed, dict) else {}
-        except json.JSONDecodeError:
-            return {}
+            parsed = json.loads(candidate)
+        except (json.JSONDecodeError, ValueError):
+            continue
+        if isinstance(parsed, dict):
+            return parsed
     return {}
 
 
@@ -157,8 +166,9 @@ class SignalResearchAgent(BaseAgent):
                     # A callable instruction bypasses {placeholder} templating, so company
                     # names containing braces cannot break the prompt.
                     instruction=lambda _ctx, t=text: t,
-                    tools=[google_search],
+                    tools=search_tools(),
                     output_key=f"signals_{i}",
+                    generate_content_config=models.generation_config(),
                 )
             )
 

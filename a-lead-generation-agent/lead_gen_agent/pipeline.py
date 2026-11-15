@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 from google.adk.agents import Agent, LlmAgent, LoopAgent, SequentialAgent
 from google.adk.agents.callback_context import CallbackContext
-from google.adk.tools import exit_loop, google_search
+from google.adk.tools import exit_loop
 from google.genai import types
 
-from . import config, prompts
+from . import config, models, prompts
 from .config import K
 from .schemas import LeadBatch
 from .stages import (
@@ -21,18 +21,19 @@ from .stages import (
     SignalResearchAgent,
 )
 from .tools.brief import approve_research_brief, save_research_brief
+from .tools.search import search_tools
 
 
 @dataclass
 class Models:
     """One model (name or BaseLlm instance) per role."""
 
-    coordinator: Any = config.FAST_MODEL
-    researcher: Any = config.FAST_MODEL
-    extractor: Any = config.FAST_MODEL
-    evaluator: Any = config.FAST_MODEL
-    signals: Any = config.FAST_MODEL
-    composer: Any = config.SMART_MODEL
+    coordinator: Any = field(default_factory=lambda: models.make_model("fast"))
+    researcher: Any = field(default_factory=lambda: models.make_model("fast"))
+    extractor: Any = field(default_factory=lambda: models.make_model("fast"))
+    evaluator: Any = field(default_factory=lambda: models.make_model("fast"))
+    signals: Any = field(default_factory=lambda: models.make_model("fast"))
+    composer: Any = field(default_factory=lambda: models.make_model("smart"))
 
 
 def _require_approved_brief(callback_context: CallbackContext) -> types.Content | None:
@@ -54,22 +55,26 @@ def build_pipeline(m: Models | None = None) -> SequentialAgent:
         max_iterations=config.max_iterations(),
         description="Iteratively searches the web until the lead pool is large and diverse enough.",
         sub_agents=[
-            # google_search is a built-in tool and cannot be combined with output_schema, hence the
-            # researcher -> extractor split: free-text research first, structured extraction second.
+            # Search tools can't be combined with output_schema, hence the researcher -> extractor
+            # split: free-text research first, structured extraction second.
             LlmAgent(
                 name="DiscoveryResearcher",
                 model=m.researcher,
                 instruction=prompts.DISCOVERY_RESEARCHER,
-                tools=[google_search],
+                tools=search_tools(),
                 output_key=K.RAW_FINDINGS,
+                generate_content_config=models.generation_config(),
             ),
             LlmAgent(
                 name="LeadExtractor",
                 model=m.extractor,
-                instruction=prompts.LEAD_EXTRACTOR,
-                output_schema=LeadBatch,
+                # Small local models are unreliable with constrained decoding, so only Gemini gets a
+                # hard output_schema; others are told to emit JSON and LeadMerger parses it leniently.
+                instruction=prompts.LEAD_EXTRACTOR + ("" if models.is_gemini() else prompts.JSON_ONLY_SUFFIX),
+                output_schema=LeadBatch if models.is_gemini() else None,
                 output_key=K.BATCH,
                 include_contents="none",
+                generate_content_config=models.generation_config(),
             ),
             LeadMergerAgent(name="LeadMerger"),
             LlmAgent(
@@ -79,6 +84,7 @@ def build_pipeline(m: Models | None = None) -> SequentialAgent:
                 tools=[exit_loop],
                 output_key=K.GAPS,
                 include_contents="none",
+                generate_content_config=models.generation_config(),
             ),
         ],
     )
@@ -99,6 +105,7 @@ def build_pipeline(m: Models | None = None) -> SequentialAgent:
                 instruction=prompts.REPORT_COMPOSER,
                 output_key=K.REPORT,
                 include_contents="none",
+                generate_content_config=models.generation_config(),
             ),
         ],
     )
@@ -112,5 +119,6 @@ def build_root_agent(m: Models | None = None) -> Agent:
         description="Collects and confirms a research brief, then launches the lead research pipeline.",
         instruction=prompts.COORDINATOR,
         tools=[save_research_brief, approve_research_brief],
+        generate_content_config=models.generation_config(),
         sub_agents=[build_pipeline(m)],
     )

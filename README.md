@@ -6,7 +6,7 @@ execution walkthrough, and a video script). See [PLAN.md](PLAN.md) for the roadm
 
 | Part | Agent | Folder | Status | Video |
 |---|---|---|---|---|
-| A | Deep-research lead-generation agent | [a-lead-generation-agent](a-lead-generation-agent) | built, 22 offline tests | _to be added_ |
+| A | Deep-research lead-generation agent | [a-lead-generation-agent](a-lead-generation-agent) | built, 37 offline tests | _to be added_ |
 | B | Gemini CLI as a tool in an ADK pipeline | b-gemini-cli-tool-agent | planned | - |
 | C | MCP-tools bug assistant | c-bug-assistant-mcp-agent | planned | - |
 | D | Production code-review assistant | d-code-review-assistant | planned | - |
