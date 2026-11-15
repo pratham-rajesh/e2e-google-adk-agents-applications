@@ -1,0 +1,9 @@
+{
+  "name": "fstring_sql_is_flagged_but_parameterised_is_not",
+  "code": "def a(db, n):\n    \"\"\"x\"\"\"\n    return db.execute(f\"SELECT * FROM t WHERE n = {n}\")\n\n\ndef b(db, n):\n    \"\"\"x\"\"\"\n    return db.execute(\"SELECT * FROM t WHERE n = ?\", (n,))\n",
+  "expect": {
+    "rules_present": [
+      "sql-injection"
+    ]
+  }
+}

@@ -86,5 +86,5 @@ Deliverables: code, tests, README with Mermaid diagram, sample output, video scr
 | A | done | done (37 tests) | not run (no API key available) | done | done |
 | B | done | done (61 tests) | not run (no API key, gemini CLI not installed) | done | done |
 | C | done | done (62 tests) | not run (no API key available) | done | done |
-| D | todo | todo | needs API key | todo | todo |
+| D | done | done (127 tests + 11-case eval set) | not run (no API key, docker sandbox not exercised) | done | done |
 | E | todo | todo | needs API key (+AlloyDB optional) | todo | todo |

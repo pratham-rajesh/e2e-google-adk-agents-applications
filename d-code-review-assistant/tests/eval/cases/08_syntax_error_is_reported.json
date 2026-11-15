@@ -1,0 +1,10 @@
+{
+  "name": "syntax_error_is_reported",
+  "code": "def broken(:\n    return 1\n",
+  "tests": "from solution import broken\n\n\ndef test_b():\n    broken()\n",
+  "expect": {
+    "syntax_ok": false,
+    "sandbox": "refused",
+    "floor_verdict": "request_changes"
+  }
+}

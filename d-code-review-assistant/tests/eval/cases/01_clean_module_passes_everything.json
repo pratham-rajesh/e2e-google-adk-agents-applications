@@ -1,0 +1,15 @@
+{
+  "name": "clean_module_passes_everything",
+  "code": "def add(a, b):\n    \"\"\"Sum of two numbers.\"\"\"\n    return a + b\n",
+  "tests": "from solution import add\n\n\ndef test_add():\n    assert add(1, 2) == 3\n\n\ndef test_add_negative():\n    assert add(-1, 1) == 0\n",
+  "expect": {
+    "syntax_ok": true,
+    "rules_absent": [
+      "hardcoded-secret",
+      "sql-injection",
+      "risky-call:eval"
+    ],
+    "sandbox": "passed",
+    "floor_verdict": "approve"
+  }
+}

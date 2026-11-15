@@ -1,0 +1,12 @@
+{
+  "name": "mutable_default_exposed_by_test",
+  "code": "def add_item(item, items=[]):\n    \"\"\"Append item.\"\"\"\n    items.append(item)\n    return items\n",
+  "tests": "from solution import add_item\n\n\ndef test_fresh_list_each_call():\n    assert add_item(1) == [1]\n    assert add_item(2) == [2]\n",
+  "expect": {
+    "rules_present": [
+      "mutable-default-arg"
+    ],
+    "sandbox": "failed",
+    "floor_verdict": "request_changes"
+  }
+}

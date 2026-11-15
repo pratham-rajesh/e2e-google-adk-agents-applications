@@ -1,0 +1,10 @@
+{
+  "name": "infinite_loop_is_killed",
+  "code": "def spin():\n    \"\"\"Never returns.\"\"\"\n    while True:\n        pass\n",
+  "tests": "from solution import spin\n\n\ndef test_spin():\n    spin()\n",
+  "timeout": 2,
+  "expect": {
+    "sandbox": "timeout",
+    "floor_verdict": "request_changes"
+  }
+}

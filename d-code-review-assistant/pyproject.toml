@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "code-review-assistant"
+version = "0.1.0"
+description = "A production-style Python code-review assistant: Google ADK pipelines, a sandboxed test runner and a fix loop"
+requires-python = ">=3.11"
+dependencies = [
+  "google-adk>=1.18",
+  "pydantic>=2.7",
+  "python-dotenv>=1.0",
+  "pytest>=8",              # the sandbox runs the generated tests with it
+]
+
+[project.optional-dependencies]
+local = ["litellm>=1.50"]   # Ollama / Groq / OpenRouter backends
+server = ["fastapi>=0.110", "uvicorn>=0.30"]
+dev = ["pytest-asyncio>=0.23", "httpx>=0.27"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+pythonpath = ["."]
+
+[tool.setuptools]
+packages = ["code_review_assistant", "code_review_assistant.tools"]

@@ -1,0 +1,10 @@
+{
+  "name": "swallowed_and_bare_except",
+  "code": "def f():\n    \"\"\"x\"\"\"\n    try:\n        return 1\n    except:\n        pass\n\n\ndef g():\n    \"\"\"x\"\"\"\n    try:\n        return 1\n    except Exception:\n        pass\n",
+  "expect": {
+    "rules_present": [
+      "bare-except",
+      "swallowed-exception"
+    ]
+  }
+}

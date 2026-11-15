@@ -1,0 +1,8 @@
+{
+  "name": "network_import_is_refused_not_executed",
+  "code": "import socket\n\n\ndef ping(host):\n    \"\"\"Open a socket.\"\"\"\n    return socket.create_connection((host, 80), timeout=1)\n",
+  "tests": "from solution import ping\n\n\ndef test_ping():\n    assert ping('example.com')\n",
+  "expect": {
+    "sandbox": "refused"
+  }
+}

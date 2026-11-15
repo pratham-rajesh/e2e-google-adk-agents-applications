@@ -1,0 +1,11 @@
+{
+  "name": "eval_and_shell_are_critical",
+  "code": "import subprocess\n\n\ndef run(cmd):\n    \"\"\"Run.\"\"\"\n    return subprocess.run(cmd, shell=True)\n\n\ndef calc(e):\n    \"\"\"Calc.\"\"\"\n    return eval(e)\n",
+  "expect": {
+    "rules_present": [
+      "risky-call:eval",
+      "risky-call:subprocess-shell"
+    ],
+    "floor_verdict": "request_changes"
+  }
+}
