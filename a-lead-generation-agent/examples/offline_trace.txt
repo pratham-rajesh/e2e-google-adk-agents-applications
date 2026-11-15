@@ -1,0 +1,55 @@
+
+>>> USER: Find leads for my fraud-detection API aimed at fintechs in India and Singapore. I want 5 leads.
+  [LeadGenCoordinator] -> tool call save_research_brief({'product_description': 'Fraud-detection API for payment providers', 'target_industries': ['fintech', 'payments'], 'regions': ['India', 'Singapore'], 'company_size': '50-500 employees', 'buyer_personas': ['Head of Risk', 'CTO'], 'buy_signals': ['hiring', 'series b', 'compliance'], 'target_lead_count': 5, 'search_angles': ['Indian payment aggregators hiring risk engineers', 'Singapore fintech Series B 2025 compliance', 'RBI/MAS fraud-control mandates affecting payment firms']})
+  [LeadGenCoordinator] <- tool result save_research_brief
+      state += ['brief_approved', 'brief_text', 'research_brief']
+
+[LeadGenCoordinator]
+Here is the proposed research brief (above). Reply 'go' to approve or tell me what to change.
+
+
+>>> USER: Looks good, go ahead.
+  [LeadGenCoordinator] -> tool call approve_research_brief({})
+  [LeadGenCoordinator] <- tool result approve_research_brief
+      state += ['brief_approved']
+  [LeadGenCoordinator] -> tool call transfer_to_agent({'agent_name': 'LeadResearchPipeline'})
+  [LeadGenCoordinator] <- tool result transfer_to_agent
+  [LeadGenCoordinator] => transfer to LeadResearchPipeline
+  [InitResearch] Starting research: target 5 leads, up to 3 discovery rounds.
+      state += ['lead_count', 'leads', 'leads_summary', 'raw_findings', 'research_gaps', 'round_target', 'target_count']
+  [DiscoveryResearcher] (round 1 research notes)
+      state += ['raw_findings']
+  [LeadExtractor] {"leads": [{"company_name": "PayNova", "website": "https://paynova.example", "hq_location": "Bengaluru, India", "industry": "fintech payment
+      state += ['lead_batch']
+  [LeadMerger] Discovery round merged: 2 extracted, 2 new, 2 total.
+      state += ['lead_count', 'leads', 'leads_summary']
+  [CoverageEvaluator] - Need more India coverage; try remittance and lending firms.
+      state += ['research_gaps']
+  [DiscoveryResearcher] (round 2 research notes)
+      state += ['raw_findings']
+  [LeadExtractor] {"leads": [{"company_name": "PayNova Ltd", "website": "https://www.paynova.example/"}, {"company_name": "RemitRoute", "website": "https://re
+      state += ['lead_batch']
+  [LeadMerger] Discovery round merged: 2 extracted, 1 new, 3 total.
+      state += ['lead_count', 'leads', 'leads_summary']
+  [CoverageEvaluator] -> tool call exit_loop({})
+  [CoverageEvaluator] <- tool result exit_loop
+  [Enrichment] Enriched 1/3 leads from their websites.
+      state += ['leads']
+  [SignalAnalyst_0] - Hiring a Head of Fraud Risk (https://jobs.example/1) - Raised Series B (https://news.example/b)
+      state += ['signals_0']
+  [SignalAnalyst_1] - Hiring a Head of Fraud Risk (https://jobs.example/1) - Raised Series B (https://news.example/b)
+      state += ['signals_1']
+  [SignalAnalyst_2] - Hiring a Head of Fraud Risk (https://jobs.example/1) - Raised Series B (https://news.example/b)
+      state += ['signals_2']
+  [SignalResearch] Signal research finished for 3 leads.
+      state += ['leads']
+  [Scoring] Ranked 3 leads; CSV written to output\leads_20261115_011413_636260.csv.
+      state += ['csv_path', 'ranked_leads', 'ranked_leads_detail', 'ranked_leads_md']
+
+[ReportComposer]
+# Lead report (OFFLINE DEMO - illustrative data)
+
+See ranking table in the trace state.
+
+      state += ['final_report']
+CSV: output\leads_20261115_011413_636260.csv
